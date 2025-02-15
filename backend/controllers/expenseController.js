@@ -5,24 +5,33 @@ export const getExpenses = async (req, res) => {
     const expenses = await Expense.find({user: req.userId});
     res.json(expenses);
   } catch (error) {
+    console.log("Error during getting expenses:", error);
+    console.log("secret", process.env.JWT_SECRET);
+    console.log("token", token);
     res.status(500).json({ message: "Ошибка сервера", error });
   }
 };
 
 
-export const createEpense = async (req, res) => {
-    try{
-        const {title, amount, date, category} = req.body;
-        const newExpense = new Expense({title, amount, date, category});
-        await newExpense.save();
-        res.status(201).json({message: "Расход добавлен"});
-    }
-    catch(error){
-        res.status(500).json({message: "Ошибка сервера", error});
+export const createExpense = async (req, res) => {
+    try {
+        const { title, amount, date, category } = req.body;
+        const expense = new Expense({
+            title,
+            amount,
+            date,
+            category,
+            user: req.userId
+        });
+
+        await expense.save();
+        res.status(201).json(expense);
+    } catch (error) {
+        res.status(500).json({ message: "Ошибка сервера", error });
     }
 };
 
-export const updateExpanse =async (req, res) => {
+export const updateExpense =async (req, res) => {
     try{
         const {id} = req.params;
         const {title, amount, date, category} = req.body;
