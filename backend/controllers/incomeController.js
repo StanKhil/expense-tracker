@@ -1,19 +1,19 @@
-import Expense from "../models/Expense.js";
+import Income from "../models/Income.js";
 
-export const getExpenses = async (req, res) => {
+export const getIncomes = async (req, res) => {
   try {
-    const expenses = await Expense.find({user: req.userId});
-    res.json(expenses);
+    const incomes = await Income.find({user: req.userId});
+    res.json(incomes);
   } catch (error) {
     res.status(500).json({ message: "Помилка сервера", error });
   }
 };
 
 
-export const createExpense = async (req, res) => {
+export const createIncome = async (req, res) => {
     try {
         const { title, amount, date, category } = req.body;
-        const expense = new Expense({
+        const income = new Income({
             title,
             amount,
             date,
@@ -21,30 +21,30 @@ export const createExpense = async (req, res) => {
             user: req.userId
         });
 
-        await expense.save();
-        res.status(201).json(expense);
+        await income.save();
+        res.status(201).json(income);
     } catch (error) {
         res.status(500).json({ message: "Помилка сервера", error });
     }
 };
 
-export const updateExpense =async (req, res) => {
+export const updateIncome =async (req, res) => {
     try{
         const {id} = req.params;
         const {title, amount, date, category} = req.body;
-        const updatedExpense = {title, amount, date, category};
-        await Expense.findByIdAndUpdate(id, updatedExpense);
+        const updatedIncome= {title, amount, date, category};
+        await Income.findByIdAndUpdate(id, updatedIncome);
     }
     catch(error){
         res.status(500).json({message: "Помилка сервера", error});
     }
 };
 
-export const deleteExpense = async (req, res) => {
+export const deleteIncome = async (req, res) => {
     try{
         const {id} = req.params;
-        await Expense.findByIdAndDelete(id);
-        res.json({message: "Витрата видалена"});
+        await Income.findByIdAndDelete(id);
+        res.json({message: "Прибуток видалено"});
     }
     catch(error){
         res.status(500).json({message: "Помилка сервера", error});
