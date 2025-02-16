@@ -1,37 +1,38 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 
-
 export const register = async (req, res) => {
-    try {
-      const { name, password } = req.body;
-  
-      if (!name || !password) {
-        return res.status(400).json({ message: "Имя и пароль обязательны" + name  + " " + password});
-      }
-  
-      const existingUser = await User.findOne({ name });
-      if (existingUser) {
-        return res.status(400).json({ message: "Пользователь уже существует" });
-      }
-  
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      const newUser = new User({ name, password: hashedPassword });
-      await newUser.save();
-  
-      res.status(201).json({ message: "Пользователь зарегистрирован" });
-    } catch (error) {
-      console.error("Error during registration:", error);
-      res.status(500).json({ message: "Ошибка сервера", error });
-    }
-  };
-  
+  try {
+    const { name, password } = req.body;
 
+    if (!name || !password) {
+      return res.status(400).json({ message: "Имя и пароль обязательны" });
+    }
+
+    const existingUser = await User.findOne({ name });
+    if (existingUser) {
+      return res.status(400).json({ message: "Пользователь уже существует" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({ name, password: hashedPassword });
+    await newUser.save();
+
+    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.status(201).json({ message: "Пользователь зарегистрирован", token, userId: newUser._id });
+  } catch (error) {
+    console.error("Error during registration:", error);
+    res.status(500).json({ message: "Ошибка сервера", error });
+  }
+};
 
 export const login = async (req, res) => {
   try {
@@ -50,16 +51,13 @@ export const login = async (req, res) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
-    console.log("token", token);
-    console.log("secret", process.env.JWT_SECRET);
 
     res.json({ token, userId: user._id });
   } catch (error) {
-    console.error("Error during logining:", error);
+    console.error("Error during login:", error);
     res.status(500).json({ message: "Ошибка сервера", error });
   }
 };
-
 
 export const getUser = async (req, res) => {
   try {

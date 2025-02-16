@@ -1,0 +1,116 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #57c84d, #3a8b29);
+    color: #333;
+  }
+  
+  .background {
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .section {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #3a8b29;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .input-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  label {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #3a8b29;
+    border-radius: 5px;
+  }
+  
+  .list {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #3a8b29;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .items-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .item-card {
+    background: white;
+    color: black;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .item-card:hover {
+    transform: scale(1.02);
+  }
+  
+  .item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .category {
+    font-style: italic;
+    color: #3a8b29;
+  }
+  
+
+  button {
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    transition: 0.3s;
+    background-color: #3a8b29;
+    color: white;
+  }
+  
+  button:hover {
+    opacity: 0.8;
+  }
+  
+  .delete-btn {
+    background-color: rgb(207, 86, 86);
+    color: white;
+  }
+  
