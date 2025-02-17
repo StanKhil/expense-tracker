@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios';
-import { reactive, ref } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import '../assets/style.css';
 import Navigation from '../components/Navigation.vue';
 
@@ -17,14 +17,15 @@ const token = localStorage.getItem('token');
 const incomes = reactive({ list: [] });
 const expenses = reactive({ list: [] });
 
+const balance = ref(0);
+
 const fetchData = async () => {
   let expenseUrl = 'http://localhost:3000/api/expenses';
   let incomeUrl = 'http://localhost:3000/api/incomes';
-  
-  if (filterValue.value.trim() === '') {
+  if (String(filterValue.value).trim() === '') {
     console.warn('Поле фільтру порожнє');
     return;
-  }
+}
   
   try {
     if (filterType.value === 'category') {
@@ -53,12 +54,45 @@ const fetchData = async () => {
     console.error('Ошибка загрузки данных', error);
   }
 };
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    headers: { Authorization: `Bearer ${token}` },
+  };
+};
+
+const getCurrentMoney = async () => {
+    const allIncomes = reactive({ list: [] });
+    const allExpenses = reactive({ list: [] });
+
+    try {
+        const resInc = await axios.get('http://localhost:3000/api/incomes', getAuthHeaders());
+        allIncomes.list = resInc.data;
+
+        const resExp = await axios.get('http://localhost:3000/api/expenses', getAuthHeaders());
+        allExpenses.list = resExp.data;
+
+        const totalIncomes = allIncomes.list.reduce((sum, income) => sum + income.amount, 0);
+        const totalExpenses = allExpenses.list.reduce((sum, expense) => sum + expense.amount, 0);
+        balance.value = totalIncomes - totalExpenses;
+
+        console.log(`Текущий остаток: ${balance} грн`);
+        return balance;
+    } catch (error) {
+        console.error('Ошибка при получении данных:', error);
+        return null;
+    }
+};
+
+onMounted(getCurrentMoney);
 </script>
 
 <template>
     <Navigation />
-    <div class="background">
+    <div class="background"> 
         <div class="container">
+            <h1 class="balance">Баланс: {{ balance }}</h1>
             <div class="section">
                 <label for="filterType">Фільтр:</label>
                 <div class="input-form">
@@ -112,11 +146,6 @@ const fetchData = async () => {
     width: 100%;
 }
 
-label {
-    font-size: 18px;
-    font-weight: bold;
-}
-
 .input-form {
     display: flex;
     flex-direction: row;
@@ -142,35 +171,19 @@ input, select {
     width: 48%;
 }
 
-.item-card {
-    background: white;
-    color: black;
-    padding: 15px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease-in-out;
+.balance {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-weight: bold;
+  color: #3a8b29;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 15px 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.item-card:hover {
-    transform: scale(1.02);
-}
-
-button {
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-    transition: 0.3s;
-    background-color: #3a8b29;
-    color: white;
-}
-
-button:hover {
-    opacity: 0.8;
-}
 </style>
