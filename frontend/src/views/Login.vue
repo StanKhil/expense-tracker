@@ -34,7 +34,7 @@ const loginUser = async () => {
 
 const registerUser = async () => {
   try {
-    const response = await axiosInstance.post('/auth/register', {
+    const response = await axiosInstance.post('/register', {
       name: user.name,
       password: user.password, 
     });
