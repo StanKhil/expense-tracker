@@ -3,6 +3,10 @@ import axios from 'axios';
 import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
+const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
+
 const router = useRouter();
 
 const user = reactive({
@@ -12,7 +16,7 @@ const user = reactive({
 
 const loginUser = async () => {
   try {
-    const response = await axios.post('/login', {
+    const response = await axiosInstance.post('/login', {
       name: user.name,
       password: user.password, 
     });
@@ -30,7 +34,7 @@ const loginUser = async () => {
 
 const registerUser = async () => {
   try {
-    const response = await axios.post('/auth/register', {
+    const response = await axiosInstance.post('/auth/register', {
       name: user.name,
       password: user.password, 
     });
