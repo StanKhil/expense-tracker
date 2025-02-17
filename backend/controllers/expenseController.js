@@ -10,6 +10,71 @@ export const getExpenses = async (req, res) => {
 };
 
 
+export const getExpensesByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const expenses = await Expense.find({ category, user: req.userId });
+    res.json(expenses);
+  } catch (error) {
+    res.status(500).json({ message: "Помилка сервера", error });
+  }
+};
+
+
+export const getExpensesByDate = async (req, res) => {
+  try {
+    const { date } = req.params;
+    const startDate = new Date(date);
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 59, 999);
+  
+    const expenses = await Expense.find({
+      user: req.userId,
+      date: { $gte: startDate, $lte: endDate },
+    });
+  
+    res.json(expenses);
+  } catch (error) {
+    res.status(500).json({ message: "Помилка сервера", error });
+  }
+};
+
+
+export const getExpensesByMonth = async (req, res) => {
+  try {
+    const { year, month } = req.params;
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+  
+    const expenses = await Expense.find({
+      user: req.userId,
+      date: { $gte: startDate, $lte: endDate },
+    });
+  
+    res.json(expenses);
+  } catch (error) {
+    res.status(500).json({ message: "Помилка сервера", error });
+  }
+};
+  
+export const getExpensesByYear = async (req, res) => {
+  try {
+    const { year } = req.params;
+    const startDate = new Date(year, 0, 1);
+    const endDate = new Date(year, 11, 31, 23, 59, 59, 999);
+  
+    const expenses = await Expense.find({
+      user: req.userId,
+      date: { $gte: startDate, $lte: endDate },
+    });
+  
+    res.json(expenses);
+  } catch (error) {
+    res.status(500).json({ message: "Помилка сервера", error });
+  }
+};
+  
+
 export const createExpense = async (req, res) => {
     try {
         const { title, amount, date, category } = req.body;

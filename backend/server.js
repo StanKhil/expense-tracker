@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import incomeRoutes from "./routes/incomeRoutes.js";
 import dotenv from 'dotenv';
+import 'dotenv/config'
 
 dotenv.config();
 

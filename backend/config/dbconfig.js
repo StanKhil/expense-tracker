@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
+import 'dotenv/config'
 mongoose.set('strictQuery', false);
-const dbURI = 'mongodb+srv://stankhil:rzYb4hZOqfToV3QE@cluster0.ziph0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const dbURI = process.env.URIDB;
 
 const connectDB = async () => {
     try {

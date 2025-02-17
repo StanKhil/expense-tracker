@@ -16,13 +16,10 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
-  console.log("Перехід на:", to.path, "| Токен:", token);
 
   if (to.meta.requiresAuth && !token) {
-    console.log("Доступ заборонено, редирект на /");
     next('/'); 
   } else {
-    console.log("Доступ дозволено");
     next();
   }
 });
