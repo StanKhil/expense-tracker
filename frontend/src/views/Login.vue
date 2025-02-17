@@ -16,7 +16,7 @@ const user = reactive({
 
 const loginUser = async () => {
   try {
-    const response = await axiosInstance.post('/login', {
+    const response = await axiosInstance.post('/auth/login', {
       name: user.name,
       password: user.password, 
     });
@@ -34,7 +34,7 @@ const loginUser = async () => {
 
 const registerUser = async () => {
   try {
-    const response = await axiosInstance.post('/register', {
+    const response = await axiosInstance.post('/auth/register', {
       name: user.name,
       password: user.password, 
     });
