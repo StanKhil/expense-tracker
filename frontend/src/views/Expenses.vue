@@ -73,7 +73,7 @@ const getExpenses = async () => {
 
 const deleteExpense = async (id) => {
   try {
-    await axiosInstance.delete(`http://localhost:3000/api/expenses/${id}`, getAuthHeaders());
+    await axiosInstance.delete(`/expenses/${id}`, getAuthHeaders());
     console.log('Витрату видалено:', id);
 
     await getExpenses();
