@@ -4,6 +4,9 @@ import { reactive, onMounted } from 'vue';
 import '../assets/style.css';
 import Navigation from '../components/Navigation.vue';
 
+const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
 
 const formatDate = (dateStr) => {
   const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -28,8 +31,8 @@ const getAuthHeaders = () => {
 
 const addIncome = async () => {
   try {
-    const response = await axios.post(
-      'http://localhost:3000/api/incomes',
+    const response = await axiosInstance.post(
+      '/incomes',
       {
         title: income.title,
         amount: income.amount,
@@ -54,31 +57,14 @@ const addIncome = async () => {
 
 const getIncomes = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/api/incomes', getAuthHeaders());
-    incomes.list = response.data;
+    const response = await axiosInstance.get('/incomes', getAuthHeaders());
     console.log('Доходи отримані:', response.data);
+    incomes.list = response.data;
   } catch (error) {
     console.error('Помилка при отриманні доходів:', error.response?.data || error.message);
-    if (error.response?.status === 401) {
-      alert('Помилка авторизації! Будь ласка, увійдіть знову.');
-    } else {
-      alert('Помилка при отриманні доходів!');
-    }
   }
 };
 
-
-const deleteIncome = async (id) => {
-  try {
-    await axios.delete(`http://localhost:3000/api/incomes/${id}`, getAuthHeaders());
-    console.log('Дохід видалено:', id);
-
-    await getIncomes();
-  } catch (error) {
-    console.error('Помилка при видаленні доходу:', error.response?.data || error.message);
-    alert('Помилка при видаленні доходу!');
-  }
-};
 
 onMounted(getIncomes);
 </script>

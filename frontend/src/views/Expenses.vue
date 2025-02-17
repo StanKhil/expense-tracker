@@ -4,6 +4,11 @@ import { reactive, onMounted } from 'vue';
 import '../assets/style.css';
 import Navigation from '../components/Navigation.vue';
 
+const axiosInstance = axios.create({
+    baseURL: import.meta.env.VITE_API_URL, 
+  });
+
+
 const formatDate = (dateStr) => {
   const options = { day: 'numeric', month: 'long', year: 'numeric' };
   return new Date(dateStr).toLocaleDateString('uk-UA', options);
@@ -27,8 +32,8 @@ const getAuthHeaders = () => {
 
 const addExpense = async () => {
   try {
-    const response = await axios.post(
-      'http://localhost:3000/api/expenses',
+    const response = await axiosInstance.post(
+      '/expenses',
       {
         title: expense.title,
         amount: expense.amount,
@@ -53,7 +58,7 @@ const addExpense = async () => {
 
 const getExpenses = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/api/expenses', getAuthHeaders());
+    const response = await axiosInstance.get('/expenses', getAuthHeaders());
     expenses.list = response.data;
     console.log('Витрати отримані:', response.data);
   } catch (error) {
@@ -68,7 +73,7 @@ const getExpenses = async () => {
 
 const deleteExpense = async (id) => {
   try {
-    await axios.delete(`http://localhost:3000/api/expenses/${id}`, getAuthHeaders());
+    await axiosInstance.delete(`http://localhost:3000/api/expenses/${id}`, getAuthHeaders());
     console.log('Витрату видалено:', id);
 
     await getExpenses();

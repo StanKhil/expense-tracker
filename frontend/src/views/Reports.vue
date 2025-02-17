@@ -4,6 +4,10 @@ import { reactive, ref, onMounted } from 'vue';
 import '../assets/style.css';
 import Navigation from '../components/Navigation.vue';
 
+const axiosInstance = axios.create({
+    baseURL: import.meta.env.VITE_API_URL, 
+  });
+
 const formatDate = (dateStr) => {
   const options = { day: 'numeric', month: 'long', year: 'numeric' };
   return new Date(dateStr).toLocaleDateString('uk-UA', options);
@@ -20,8 +24,8 @@ const expenses = reactive({ list: [] });
 const balance = ref(0);
 
 const fetchData = async () => {
-  let expenseUrl = 'http://localhost:3000/api/expenses';
-  let incomeUrl = 'http://localhost:3000/api/incomes';
+  let expenseUrl = '/expenses';
+  let incomeUrl = '/incomes';
   if (String(filterValue.value).trim() === '') {
     console.warn('Поле фільтру порожнє');
     return;
@@ -29,23 +33,23 @@ const fetchData = async () => {
   
   try {
     if (filterType.value === 'category') {
-      expenseUrl = `http://localhost:3000/api/expenses/category/${encodeURIComponent(filterValue.value)}`;
-      incomeUrl = `http://localhost:3000/api/incomes/category/${encodeURIComponent(filterValue.value)}`;
+      expenseUrl = `/expenses/category/${encodeURIComponent(filterValue.value)}`;
+      incomeUrl = `/incomes/category/${encodeURIComponent(filterValue.value)}`;
     } else if (filterType.value === 'date') {
-      expenseUrl = `http://localhost:3000/api/expenses/date/${filterValue.value}`;
-      incomeUrl = `http://localhost:3000/api/incomes/date/${filterValue.value}`;
+      expenseUrl = `/expenses/date/${filterValue.value}`;
+      incomeUrl = `/incomes/date/${filterValue.value}`;
     } else if (filterType.value === 'month') {
       const [year, month] = filterValue.value.split('-');
-      expenseUrl = `http://localhost:3000/api/expenses/month/${year}/${month}`;
-      incomeUrl = `http://localhost:3000/api/incomes/month/${year}/${month}`;
+      expenseUrl = `/expenses/month/${year}/${month}`;
+      incomeUrl = `/incomes/month/${year}/${month}`;
     } else if (filterType.value === 'year') {
-      expenseUrl = `http://localhost:3000/api/expenses/year/${filterValue.value}`;
-      incomeUrl = `http://localhost:3000/api/incomes/year/${filterValue.value}`;
+      expenseUrl = `/expenses/year/${filterValue.value}`;
+      incomeUrl = `/incomes/year/${filterValue.value}`;
     }
 
     const [expenseData, incomeData] = await Promise.all([
-      axios.get(expenseUrl, { headers: { Authorization: `Bearer ${token}` } }),
-      axios.get(incomeUrl, { headers: { Authorization: `Bearer ${token}` } })
+      axiosInstance.get(expenseUrl, { headers: { Authorization: `Bearer ${token}` } }),
+      axiosInstance.get(incomeUrl, { headers: { Authorization: `Bearer ${token}` } })
     ]);
     
     expenses.list = expenseData.data;
@@ -67,10 +71,10 @@ const getCurrentMoney = async () => {
     const allExpenses = reactive({ list: [] });
 
     try {
-        const resInc = await axios.get('http://localhost:3000/api/incomes', getAuthHeaders());
+        const resInc = await axiosInstance.get('/incomes', getAuthHeaders());
         allIncomes.list = resInc.data;
 
-        const resExp = await axios.get('http://localhost:3000/api/expenses', getAuthHeaders());
+        const resExp = await axiosInstance.get('/expenses', getAuthHeaders());
         allExpenses.list = resExp.data;
 
         const totalIncomes = allIncomes.list.reduce((sum, income) => sum + income.amount, 0);
