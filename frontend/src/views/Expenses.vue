@@ -5,9 +5,8 @@ import '../assets/style.css';
 import Navigation from '../components/Navigation.vue';
 
 const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL, 
-  });
-
+  baseURL: import.meta.env.VITE_API_URL,
+});
 
 const formatDate = (dateStr) => {
   const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -17,11 +16,24 @@ const formatDate = (dateStr) => {
 const expense = reactive({
   title: '',
   amount: '',
-  date: '',
+  date: new Date().toISOString().split('T')[0],
   category: '',
 });
 
 const expenses = reactive({ list: [] });
+
+const categories = [
+  'Продукти',
+  'Медицина',
+  'Розваги',
+  'Тварини',
+  'Транспорт',
+  'Рослини',
+  'Навчання',
+  'Харчування',
+  'Бізнес',
+  'Інше'
+];
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -47,7 +59,7 @@ const addExpense = async () => {
 
     expense.title = '';
     expense.amount = '';
-    expense.date = '';
+    expense.date = new Date().toISOString().split('T')[0];
     expense.category = '';
 
     await getExpenses();
@@ -103,7 +115,11 @@ onMounted(getExpenses);
           <input type="date" id="date" v-model="expense.date" required />
 
           <label for="category">Категорія:</label>
-          <input type="text" id="category" v-model="expense.category" required />
+          <select id="category" v-model="expense.category" required>
+            <option v-for="category in categories" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
 
           <button type="submit">Додати</button>
         </form>

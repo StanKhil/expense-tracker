@@ -6,13 +6,18 @@ import Navigation from '../components/Navigation.vue';
 
 const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_API_URL, 
-  });
+});
+
+const categories = [
+  'Продукти', 'Медицина', 'Розваги', 'Тварини', 'Транспорт', 'Рослини', 
+  'Навчання', 'Харчування', 'Бізнес', 'Інше', 'Зарплата', 'Подарунок', 
+  'Продаж', 'Кредит', 'Дивіденди'
+];
 
 const formatDate = (dateStr) => {
   const options = { day: 'numeric', month: 'long', year: 'numeric' };
   return new Date(dateStr).toLocaleDateString('uk-UA', options);
 };
-
 
 const filterType = ref('category');
 const filterValue = ref('');
@@ -23,26 +28,29 @@ const expenses = reactive({ list: [] });
 
 const balance = ref(0);
 
+const totalIncomes = ref(0);
+const totalExpenses = ref(0); 
+
 const fetchData = async () => {
   let expenseUrl = '/expenses';
   let incomeUrl = '/incomes';
+  
   if (String(filterValue.value).trim() === '') {
-    console.warn('Поле фільтру порожнє');
-    return;
-}
+    console.warn('Поле фільтру порожнє, запит по всіх категоріях');
+  }
   
   try {
-    if (filterType.value === 'category') {
+    if (filterType.value === 'category' && filterValue.value.trim() !== '') {
       expenseUrl = `/expenses/category/${encodeURIComponent(filterValue.value)}`;
       incomeUrl = `/incomes/category/${encodeURIComponent(filterValue.value)}`;
-    } else if (filterType.value === 'date') {
+    } else if (filterType.value === 'date' && filterValue.value.trim() !== '') {
       expenseUrl = `/expenses/date/${filterValue.value}`;
       incomeUrl = `/incomes/date/${filterValue.value}`;
-    } else if (filterType.value === 'month') {
+    } else if (filterType.value === 'month' && filterValue.value.trim() !== '') {
       const [year, month] = filterValue.value.split('-');
       expenseUrl = `/expenses/month/${year}/${month}`;
       incomeUrl = `/incomes/month/${year}/${month}`;
-    } else if (filterType.value === 'year') {
+    } else if (filterType.value === 'year' && filterValue.value.trim() !== '') {
       expenseUrl = `/expenses/year/${filterValue.value}`;
       incomeUrl = `/incomes/year/${filterValue.value}`;
     }
@@ -54,6 +62,10 @@ const fetchData = async () => {
     
     expenses.list = expenseData.data;
     incomes.list = incomeData.data;
+
+    totalIncomes.value = incomes.list.reduce((sum, inc) => sum + inc.amount, 0);
+    totalExpenses.value = expenses.list.reduce((sum, exp) => sum + exp.amount, 0);
+
   } catch (error) {
     console.error('Ошибка загрузки данных', error);
   }
@@ -67,30 +79,32 @@ const getAuthHeaders = () => {
 };
 
 const getCurrentMoney = async () => {
-    const allIncomes = reactive({ list: [] });
-    const allExpenses = reactive({ list: [] });
+  const allIncomes = reactive({ list: [] });
+  const allExpenses = reactive({ list: [] });
 
-    try {
-        const resInc = await axiosInstance.get('/incomes', getAuthHeaders());
-        allIncomes.list = resInc.data;
+  try {
+    const resInc = await axiosInstance.get('/incomes', getAuthHeaders());
+    allIncomes.list = resInc.data;
 
-        const resExp = await axiosInstance.get('/expenses', getAuthHeaders());
-        allExpenses.list = resExp.data;
+    const resExp = await axiosInstance.get('/expenses', getAuthHeaders());
+    allExpenses.list = resExp.data;
 
-        const totalIncomes = allIncomes.list.reduce((sum, income) => sum + income.amount, 0);
-        const totalExpenses = allExpenses.list.reduce((sum, expense) => sum + expense.amount, 0);
-        balance.value = totalIncomes - totalExpenses;
+    totalIncomes.value = allIncomes.list.reduce((sum, income) => sum + income.amount, 0);
+    totalExpenses.value = allExpenses.list.reduce((sum, expense) => sum + expense.amount, 0);
+    balance.value = totalIncomes.value - totalExpenses.value;
 
-        console.log(`Текущий остаток: ${balance} грн`);
-        return balance;
-    } catch (error) {
-        console.error('Ошибка при получении данных:', error);
-        return null;
-    }
+    console.log(`Поточний залишок: ${balance.value} грн`);
+    return balance;
+  } catch (error) {
+    console.error('Ошибка при получении данных:', error);
+    return null;
+  }
 };
 
 onMounted(getCurrentMoney);
+onMounted(fetchData);
 </script>
+
 
 <template>
     <Navigation />
@@ -106,7 +120,9 @@ onMounted(getCurrentMoney);
                         <option value="month">За місяцем</option>
                         <option value="year">За роком</option>
                     </select>
-                    <input v-if="filterType === 'category'" v-model="filterValue" placeholder="Введіть категорію" />
+                    <select v-if="filterType === 'category'" v-model="filterValue">
+                      <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
+                    </select>
                     <input v-if="filterType === 'date'" v-model="filterValue" type="date" />
                     <input v-if="filterType === 'month'" v-model="filterValue" type="month" />
                     <input v-if="filterType === 'year'" v-model="filterValue" type="number" min="2000" max="2100" placeholder="Введіть рік" />
@@ -117,21 +133,23 @@ onMounted(getCurrentMoney);
             <div class="list two-columns">
                 <div class="column">
                     <h3>Доходи</h3>
+                    <h2>Сума: {{ totalIncomes }}</h2>
                     <div class="items-list">
                         <div class="item-card" v-for="inc in incomes.list" :key="inc.id">
                             <div class="item-info">
-                                <strong>{{ inc.title }}</strong> - {{ inc.amount }} грн ({{ formatDate(inc.date) }})
+                                <strong>{{ inc.title }}</strong> - {{ inc.amount }} грн ({{ formatDate(inc.date) }}) : {{ inc.category }}
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="column">
                     <h3>Витрати</h3>
+                    <h2>Сума: {{ totalExpenses }}</h2>
                     <div class="items-list">
                         <div class="item-card" v-for="exp in expenses.list" :key="exp.id">
                             <div class="item-info">
-                                <strong>{{ exp.title }}</strong> - {{ exp.amount }} грн ({{ formatDate(exp.date) }})
-                            </div>
+                                <strong>{{ exp.title }}</strong> - {{ exp.amount }} грн ({{ formatDate(exp.date) }}) : {{ exp.category }}
+                            </div> 
                         </div>
                     </div>
                 </div>

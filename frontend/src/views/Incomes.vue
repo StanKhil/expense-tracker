@@ -16,11 +16,20 @@ const formatDate = (dateStr) => {
 const income = reactive({
   title: '',
   amount: '',
-  date: '',
+  date: new Date().toISOString().split('T')[0],
   category: '',
 });
 
 const incomes = reactive({ list: [] });
+
+const categories = [
+  'Зарплата',
+  'Подарунок',
+  'Продаж',
+  'Кредит',
+  'Дивіденди',
+  'Інше'
+];
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -46,7 +55,7 @@ const addIncome = async () => {
 
     income.title = '';
     income.amount = '';
-    income.date = '';
+    income.date = new Date().toISOString().split('T')[0];
     income.category = '';
 
     await getIncomes();
@@ -65,6 +74,17 @@ const getIncomes = async () => {
   }
 };
 
+const deleteIncome = async (id) => {
+  try {
+    await axiosInstance.delete(`/incomes/${id}`, getAuthHeaders());
+    console.log('Дохід видалено:', id);
+
+    await getIncomes();
+  } catch (error) {
+    console.error('Помилка при видаленні витрати:', error.response?.data || error.message);
+    alert('Помилка при видаленні витрати!');
+  }
+};
 
 onMounted(getIncomes);
 </script>
@@ -86,7 +106,11 @@ onMounted(getIncomes);
           <input type="date" id="date" v-model="income.date" required />
 
           <label for="category">Категорія:</label>
-          <input type="text" id="category" v-model="income.category" required />
+          <select id="category" v-model="income.category" required>
+            <option v-for="category in categories" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
 
           <button type="submit">Додати</button>
         </form>
